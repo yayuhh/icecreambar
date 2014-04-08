@@ -1,6 +1,6 @@
 ![logo](https://raw.githubusercontent.com/yayuhh/icecreambar/master/logo.png)
 
-# ice cream bar
+# ice cream bar [![Build Status](https://travis-ci.org/yayuhh/icecreambar.svg?branch=master)](https://travis-ci.org/yayuhh/icecreambar)
 hapi plugin for rollbar error logging
 
 ## usage
