@@ -19,8 +19,9 @@
     "log",
     "logging"
   ],
+  "author": "johnny domino <johnny@yayuhh.com>",
   "contributors": [
-    "johnny domino <jvdomino@yayuhh.com>",
+    "johnny domino <johnny@yayuhh.com>",
     "john bauer <notjrbauer@gmail.com>"
   ],
   "license": "BSD-2-Clause",
