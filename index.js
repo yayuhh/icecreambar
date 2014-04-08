@@ -8,12 +8,7 @@ exports.register = function(plugin, options, next) {
     var response = request.response;
 
     if (response.isBoom) {
-      var errorObj = {
-        message: response.message,
-        body:    response.output.body
-      };
-
-      rollbar(errorObj, request.raw.req, null);
+      rollbar(response, request.raw.req, null);
     }
 
     reply();
