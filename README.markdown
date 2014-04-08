@@ -1,18 +1,18 @@
-![icecream-bar](https://github.com/yayuhh/icecream-rollbar/blob/master/logo.png)
+![logo](https://github.com/yayuhh/icecreambar/blob/master/logo.png)
 
-# icecream-rollbar
+# ice cream bar
 
 ## usage
 ### example
 ```javascript
-// npm install icecream-rollbar rollbar hapi --save
+// npm install icecreambar rollbar hapi --save
 
-var IceCreamBar = require('icecream-rollbar');
+var IceCreamBar = require('icecreambar');
 var Hapi        = require('hapi');
 var server      = new Hapi.Server('0.0.0.0', 3000);
 
 var plugins = {
-  'icecream-rollbar': {
+  'icecreambar': {
     'accessToken': '4815162342'
   }
 };
