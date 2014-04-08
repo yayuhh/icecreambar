@@ -1,9 +1,9 @@
 ![logo](https://raw.githubusercontent.com/yayuhh/icecreambar/master/logo.png)
 
 # ice cream bar
+hapi plugin for rollbar error logging
 
 ## usage
-### example
 ```javascript
 // npm install icecreambar rollbar hapi --save
 
