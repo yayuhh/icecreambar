@@ -6,9 +6,21 @@ exports.register = function(plugin, options, next) {
   plugin.ext('onPreResponse', function (request, reply) {
 
     var response = request.response;
-    
+
     if (response.isBoom) {
-      rollbar(response, function(error) { reply(); });
+      // deal with rollbar's assumptions about Express
+      var req = request.raw.req;
+
+      req.socket = {
+        encrypted: request.server.info.protocol === 'https'
+      };
+
+      req.connection = {
+        remoteAddress: request.info.remoteAddress
+      };
+
+      // submit error
+      rollbar(response, req, function(error) { reply(); });
     } else {
       reply();
     }
