@@ -6,13 +6,12 @@ exports.register = function(plugin, options, next) {
   plugin.ext('onPreResponse', function (request, reply) {
 
     var response = request.response;
-
+    
     if (response.isBoom) {
-      rollbar(response, request.raw.req, null);
+      rollbar(response, function(error) { reply(); });
+    } else {
+      reply();
     }
-
-    reply();
-
   });
 
   next();
