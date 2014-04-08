@@ -1,0 +1,38 @@
+{
+  "name": "icecream-rollbar",
+  "version": "0.0.1",
+  "description": "hapi plugin for rollbar error logging",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yayuhh/icecream-rollbar.git"
+  },
+  "keywords": [
+    "hapi",
+    "plugin",
+    "rollbar",
+    "error",
+    "boom",
+    "log",
+    "logging"
+  ],
+  "contributors": [
+    "johnny domino <jvdomino@yayuhh.com>",
+    "john bauer <notjrbauer@gmail.com>"
+  ],
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/yayuhh/icecream-rollbar/issues"
+  },
+  "peerDependencies": {
+    "rollbar": "0.x.x"
+  },
+  "devDependencies": {
+    "hapi":"3.x.x",
+    "rollbar":"0.x.x",
+    "tape":"2.x.x"
+  }
+}
