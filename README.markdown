@@ -1,4 +1,4 @@
-![logo](https://github.com/yayuhh/icecreambar/blob/master/logo.png)
+![logo](https://raw.githubusercontent.com/yayuhh/icecreambar/master/logo.png)
 
 # ice cream bar
 
