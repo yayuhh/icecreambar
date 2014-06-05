@@ -7,8 +7,8 @@ hapi plugin for rollbar error logging
 ```javascript
 // npm install yayuhh/icecreambar rollbar hapi --save
 
-var Hapi        = require('hapi');
-var server      = new Hapi.Server('0.0.0.0', 3000);
+var Hapi   = require('hapi');
+var server = new Hapi.Server('0.0.0.0', 3000);
 
 var plugins = {
   'icecreambar': {
