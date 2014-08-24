@@ -10,13 +10,14 @@ hapi plugin for rollbar error logging
 var Hapi   = require('hapi');
 var server = new Hapi.Server('0.0.0.0', 3000);
 
-var plugins = {
-  'icecreambar': {
+var icb = {
+  plugin: require('icecreambar'),
+  options: {
     'accessToken': '4815162342'
   }
 };
 
-server.pack.require(plugins, function(error) {
+server.pack.register(plugins, function(error) {
   if (error) throw err;
 });
 ```
