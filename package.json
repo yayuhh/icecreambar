@@ -1,6 +1,6 @@
 {
   "name": "icecreambar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "hapi plugin for rollbar error logging",
   "main": "index.js",
   "scripts": {
@@ -32,8 +32,8 @@
     "rollbar": "0.x.x"
   },
   "devDependencies": {
-    "hapi":"6.x.x",
-    "rollbar":"0.x.x",
-    "tape":"2.x.x"
+    "hapi": "6.x.x",
+    "rollbar": "0.x.x",
+    "tape": "2.x.x"
   }
 }
