@@ -1,6 +1,6 @@
 {
   "name": "icecreambar",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "hapi plugin for rollbar error logging",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "johnny domino <johnny@yayuhh.com>",
     "john bauer <notjrbauer@gmail.com>"
   ],
-  "license": "BSD-2-Clause",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/yayuhh/icecreambar/issues"
   },
@@ -32,7 +32,7 @@
     "rollbar": "0.x.x"
   },
   "devDependencies": {
-    "hapi":"3.x.x",
+    "hapi":"6.x.x",
     "rollbar":"0.x.x",
     "tape":"2.x.x"
   }
