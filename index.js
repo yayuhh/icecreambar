@@ -1,34 +1,97 @@
-var Rollbar = require('./lib/rollbar');
+const Rollbar = require('./lib/rollbar');
 
-exports.register = function(plugin, options, next) {
-  var rollbar = Rollbar(options.accessToken);
+exports.register = function (server, options, next) {
 
-  plugin.ext('onPreResponse', function (request, reply) {
+  const scope = options.scope;
+  const relevantPaths = options.relevantPaths;
+  const pathIsRelevant = function (path) {
+    if (!relevantPaths) { return true; }
+    else { return relevantPaths.indexOf(path) > -1; }
+  };
 
-    var response = request.response;
+  options.environment = options.environment || process.env.NODE_ENV || 'development';
+  options.exitOnUncaughtException = true;
 
-    if (response.isBoom) {
-      // deal with rollbar's assumptions about Express
-      var req = request.raw.req;
+  const rollbar = new Rollbar(options.accessToken, options);
+  server.plugins.icecreambar = server.plugins.icecreambar || {};
 
-      req.socket = {
-        encrypted: request.server.info.protocol === 'https'
-      };
+  if (scope) {
+    // scope is used when emplying `multiple`
+    server.plugins.icecreambar[scope] = rollbar;
+  } else {
+    server.expose('rollbar', rollbar);
+  }
 
-      req.connection = {
-        remoteAddress: request.info.remoteAddress
-      };
 
-      // submit error
-      rollbar(response, req, function(error) { reply(); });
-    } else {
-      reply();
+  server.on('request-error', function internalError (request, error) {
+
+    if (!pathIsRelevant(request.route.path)) { return; }
+    rollbar.handleError(error, decorateRequestForRollbar(request));
+  });
+
+  server.on('log', function rollbarLog(event, tags) {
+
+    // if this ERROR is intended for Rollbar
+    if (tags.rollbarError) {
+      if (scope && !tags.scope) { return; /* ignore message */ }
+      rollbar.handleError(event.err, decorateRequestForRollbar(event.req));
+      return;
+    }
+
+    // if this MESSAGE is intended for Rollbar
+    if (tags.rollbarMessage) {
+      if (scope && !tags.scope) { return; /* ignore message */ }
+      rollbar.reportMessage(event.msg, event.level || 'info', decorateRequestForRollbar(event.req));
+      return;
     }
   });
 
+  server.ext('onPreResponse', function (request, reply) {
+
+    if (!pathIsRelevant(request.route.path)) { return reply.continue(); }
+
+    const response = request.response;
+    const isBoom = response.isBoom;
+
+    if (isBoom) {
+      const responseIsNot5xx = (response.output.statusCode < 500) || (response.output.statusCode > 599);
+
+      if (responseIsNot5xx) {
+
+        // submit error
+        rollbar.handleError(response, decorateRequestForRollbar(request), function(er1) {
+
+          // log er1 to STDERR to bring attention to the rollbar failure
+          if (er1) { console.error(er1); }
+        });
+      }
+    }
+
+    reply.continue();
+  });
+
   next();
-}
+};
 
 exports.register.attributes = {
-  pkg: require('./package.json')
+  pkg: require('./package.json'),
+  multiple: true
 };
+
+// translate rollbar's assumptions about Express
+function decorateRequestForRollbar (request) {
+
+  if (!request) { return null; }
+
+  const req = request.raw.req;
+
+  req.socket = {
+    encrypted: request.server.info.protocol === 'https'
+  };
+
+  req.connection = {
+    remoteAddress: request.info.remoteAddress
+  };
+
+  return req;
+}

@@ -1,10 +1,10 @@
 {
   "name": "icecreambar",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "hapi plugin for rollbar error logging",
   "main": "index.js",
   "scripts": {
-    "test": "node test/index"
+    "test": "node --use_strict --harmony_arrow_functions ./node_modules/.bin/lab --lint -c"
   },
   "repository": {
     "type": "git",
@@ -19,11 +19,7 @@
     "log",
     "logging"
   ],
-  "author": "johnny domino <johnny@yayuhh.com>",
-  "contributors": [
-    "johnny domino <johnny@yayuhh.com>",
-    "john bauer <notjrbauer@gmail.com>"
-  ],
+  "author": "johnny domino <jvdomino@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/yayuhh/icecreambar/issues"
@@ -32,8 +28,11 @@
     "rollbar": "0.x.x"
   },
   "devDependencies": {
-    "hapi": "6.x.x",
+    "boom": "^2.8.0",
+    "code": "^1.4.1",
+    "hapi": "8.x.x",
+    "lab": "jmonster/lab#86cea3afa6ee4ca328715529b13e2772234bf09e",
     "rollbar": "0.x.x",
-    "tape": "2.x.x"
+    "sinon": "^1.15.3"
   }
 }
