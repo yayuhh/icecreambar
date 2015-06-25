@@ -1,9 +1,20 @@
-const Rollbar = require('./lib/rollbar');
+exports.Rollbar = require('./lib/rollbar');
 
 exports.register = function (server, options, next) {
 
   const scope = options.scope;
   const relevantPaths = options.relevantPaths;
+
+  if (server.plugins.icecreambar && !scope) {
+    // this plugin has already been registered at least once;
+    // ensure that a scope has been set
+    return next(new Error('`scope` param required (for distinguishing multiple registrations of icecreambar)'));
+  }
+
+  if (!relevantPaths) {
+    // console.error('error', 'icecreambar registered without `relevantPaths` param.');
+  }
+
   const pathIsRelevant = function (path) {
     if (!relevantPaths) { return true; }
     else { return relevantPaths.indexOf(path) > -1; }
@@ -12,16 +23,9 @@ exports.register = function (server, options, next) {
   options.environment = options.environment || process.env.NODE_ENV || 'development';
   options.exitOnUncaughtException = true;
 
-  const rollbar = new Rollbar(options.accessToken, options);
+  const rollbar = new exports.Rollbar(options.accessToken, options);
   server.plugins.icecreambar = server.plugins.icecreambar || {};
-
-  if (scope) {
-    // scope is used when emplying `multiple`
-    server.plugins.icecreambar[scope] = rollbar;
-  } else {
-    server.expose('rollbar', rollbar);
-  }
-
+  server.plugins.icecreambar[scope || 'default'] = rollbar;
 
   server.on('request-error', function internalError (request, error) {
 
@@ -29,22 +33,7 @@ exports.register = function (server, options, next) {
     rollbar.handleError(error, decorateRequestForRollbar(request));
   });
 
-  server.on('log', function rollbarLog(event, tags) {
-
-    // if this ERROR is intended for Rollbar
-    if (tags.rollbarError) {
-      if (scope && !tags.scope) { return; /* ignore message */ }
-      rollbar.handleError(event.err, decorateRequestForRollbar(event.req));
-      return;
-    }
-
-    // if this MESSAGE is intended for Rollbar
-    if (tags.rollbarMessage) {
-      if (scope && !tags.scope) { return; /* ignore message */ }
-      rollbar.reportMessage(event.msg, event.level || 'info', decorateRequestForRollbar(event.req));
-      return;
-    }
-  });
+  server.on('log', rollbarLog(rollbar, scope));
 
   server.ext('onPreResponse', function (request, reply) {
 
@@ -59,10 +48,10 @@ exports.register = function (server, options, next) {
       if (responseIsNot5xx) {
 
         // submit error
-        rollbar.handleError(response, decorateRequestForRollbar(request), function(er1) {
+        rollbar.handleError(response, decorateRequestForRollbar(request), function(/*er1*/) {
 
           // log er1 to STDERR to bring attention to the rollbar failure
-          if (er1) { console.error(er1); }
+          // if (er1) { console.error(er1); }
         });
       }
     }
@@ -77,6 +66,27 @@ exports.register.attributes = {
   pkg: require('./package.json'),
   multiple: true
 };
+
+function rollbarLog (rollbar, scope) {
+  return function (event, tags) {
+
+    // if this ERROR is intended for Rollbar
+    if (tags.rollbarError) {
+      if (scope && !tags[scope]) { return; /* ignore message */ }
+      rollbar.handleError(event.err, decorateRequestForRollbar(event.req));
+      return;
+    }
+
+    // if this MESSAGE is intended for Rollbar
+    if (tags.rollbarMessage) {
+      if (scope && !tags[scope]) { return; /* ignore message */ }
+      rollbar.reportMessage(event.msg, (event.level || 'info'), decorateRequestForRollbar(event.req));
+      return;
+    }
+  };
+}
+exports.rollbarLog = rollbarLog;
+
 
 // translate rollbar's assumptions about Express
 function decorateRequestForRollbar (request) {
