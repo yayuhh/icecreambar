@@ -54,7 +54,7 @@ server.route({
 server.register({
   register: require('icecreambar'),
   options: {
-  'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
+    'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
   }
 }, function (err) {
 
@@ -64,7 +64,7 @@ server.register({
 ```
 
 ## [gratuitous] usage
-gratuitous usage involves taking advantage of icecreambar's ability to be registered more than once.
+gratuitous usage involves taking advantage of icecreambar's ability to be registered more than once. this feature is particularly useful if you're composing a server out of many plugins and each of those plugins wishes to configure it's own rollbar instance.
 
 ```javascript
 // http://hapijs.com/api#server
@@ -76,12 +76,37 @@ server.register({
   register: require('icecreambar'),
   options: {
     'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
-    'scope': 'sre',
-    'relevantPaths': ['/uptime', '/auth']
+    'scope': 'sre',                                    // namespace for this instance of rollbar
+    'relevantPaths': ['/uptime', '/auth']              // http path(s) that this instance shall report on
   }
 }, function (err) {
 
   if (err) { throw err; }
   server.start();
+
+  server.route({
+    method: 'get',
+    path: '/uptime',
+    handler: function(request, reply) {
+
+      reply(new Error('ruh-roh!'));                 // reported by server.app.icecreambar.sre
+
+      var rollbar = server.plugins.icecreambar.sre; // access the appropriate rollbar library directly
+
+      server.log(['rollbarMessage','sre'], 'This message is reported via server.app.icecreambar.sre');
+      // that log will also be reported by server.app.icecreambar.default
+      // ...if any rollbar client is registered in your project without a defined scope
+    }
+  });
 });
+```
+
+## uncaught exceptions
+this feature should only be registered on the project level; i.e., do not enable it in your plugin(s), as the result could be unexpeted error reporting and/or duplicated errors. to leverage this feature, either require the [rollbar](https://rollbar.com/docs/notifier/node_rollbar/#uncaught-exceptions) module directly or access a registered instance (e.g. `server.plugins.icecreambar.default`). either way, it'll look something like this:
+
+```js
+var rollbar = require('rollbar'); // this requires `rollbar` is installed to your `node_modules` folder
+var rollbar = server.plugins.icecreambar.default; // this requires that you've registered `icecreambar` without a scope, or explicitly named the scope `default`. you can substitute `default` for any registered scope.
+
+rollbar.handleUncaughtExceptions('POST_SERVER_ITEM_ACCESS_TOKEN', { exitOnUncaughtException: true });
 ```
