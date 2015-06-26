@@ -21,7 +21,6 @@ exports.register = function (server, options, next) {
   };
 
   options.environment = options.environment || process.env.NODE_ENV || 'development';
-  options.exitOnUncaughtException = true;
 
   const rollbar = new exports.Rollbar(options.accessToken, options);
   server.plugins.icecreambar = server.plugins.icecreambar || {};
