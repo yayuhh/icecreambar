@@ -1,5 +1,5 @@
 const Hapi = require('hapi');
-const Boom = require('Boom');
+const Boom = require('boom');
 const Code = require('code');
 const Lab = require('lab');
 const Plugin = {
