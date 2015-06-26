@@ -1,4 +1,5 @@
 const Hapi = require('hapi');
+const Boom = require('Boom');
 const Code = require('code');
 const Lab = require('lab');
 const Plugin = {
@@ -102,7 +103,7 @@ lab.experiment('server', function () {
       path: '/foo',
       handler: function(request, reply) {
 
-        reply(require('Boom').badImplementation());
+        reply(Boom.badImplementation());
       }
     });
 
@@ -133,7 +134,7 @@ lab.experiment('server', function () {
       path: '/foo',
       handler: function(request, reply) {
 
-        reply(require('Boom').badRequest('test'));
+        reply(Boom.badRequest('test'));
       }
     });
 
@@ -205,7 +206,7 @@ lab.experiment('server', function () {
           path: '/foo',
           handler: function(request, reply) {
 
-            reply(require('Boom').badImplementation());
+            reply(Boom.badImplementation());
           }
         });
 
@@ -214,7 +215,7 @@ lab.experiment('server', function () {
           path: '/bar',
           handler: function(request, reply) {
 
-            reply(require('Boom').badImplementation());
+            reply(Boom.badImplementation());
           }
         });
 
