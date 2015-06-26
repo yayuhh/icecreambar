@@ -25,12 +25,13 @@ exports.register = function (server, options, next) {
 
   const rollbar = new exports.Rollbar(options.accessToken, options);
   server.plugins.icecreambar = server.plugins.icecreambar || {};
+  server.plugins.icecreambar.decorateRequest = decorateRequest;
   server.plugins.icecreambar[scope || 'default'] = rollbar;
 
   server.on('request-error', function internalError (request, error) {
 
     if (!pathIsRelevant(request.route.path)) { return; }
-    rollbar.handleError(error, decorateRequestForRollbar(request));
+    rollbar.handleError(error, decorateRequest(request));
   });
 
   server.on('log', rollbarLog(rollbar, scope));
@@ -48,7 +49,7 @@ exports.register = function (server, options, next) {
       if (responseIsNot5xx) {
 
         // submit error
-        rollbar.handleError(response, decorateRequestForRollbar(request), function(/*er1*/) {
+        rollbar.handleError(response, decorateRequest(request), function(/*er1*/) {
 
           // log er1 to STDERR to bring attention to the rollbar failure
           // if (er1) { console.error(er1); }
@@ -73,14 +74,14 @@ function rollbarLog (rollbar, scope) {
     // if this ERROR is intended for Rollbar
     if (tags.rollbarError) {
       if (scope && !tags[scope]) { return; /* ignore message */ }
-      rollbar.handleError(event.err, decorateRequestForRollbar(event.req));
+      rollbar.handleError(event.err, decorateRequest(event.req));
       return;
     }
 
     // if this MESSAGE is intended for Rollbar
     if (tags.rollbarMessage) {
       if (scope && !tags[scope]) { return; /* ignore message */ }
-      rollbar.reportMessage(event.msg, (event.level || 'info'), decorateRequestForRollbar(event.req));
+      rollbar.reportMessage(event.msg, (event.level || 'info'), decorateRequest(event.req));
       return;
     }
   };
@@ -89,7 +90,7 @@ exports.rollbarLog = rollbarLog;
 
 
 // translate rollbar's assumptions about Express
-function decorateRequestForRollbar (request) {
+function decorateRequest (request) {
 
   if (!request) { return null; }
 
@@ -105,3 +106,5 @@ function decorateRequestForRollbar (request) {
 
   return req;
 }
+
+exports.decorateRequest = decorateRequest;
