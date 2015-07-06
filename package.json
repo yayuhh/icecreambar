@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/yayuhh/icecreambar/issues"
   },
-  "peerDependencies": {
+  "dependencies": {
     "rollbar": "0.x.x"
   },
   "devDependencies": {
