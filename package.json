@@ -31,8 +31,7 @@
     "boom": "^2.8.0",
     "code": "^1.4.1",
     "hapi": "8.x.x",
-    "lab": "jmonster/lab#86cea3afa6ee4ca328715529b13e2772234bf09e",
-    "rollbar": "0.x.x",
+    "lab": "5.13.x",
     "sinon": "^1.15.3"
   }
 }
