@@ -16,7 +16,7 @@ lab.experiment('log', function () {
     done();
   });
 
-  lab.test('handleError is called when server.log("rollbarError") w/o a scope', function (done) {
+  lab.test('handleError is called when server.log("rollbarError") w/o a matching scope', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -32,7 +32,7 @@ lab.experiment('log', function () {
     });
   });
 
-  lab.test('reportMessage is called when server.log("rollbarError") w/o a scope', function (done) {
+  lab.test('reportMessage is called when server.log("rollbarError") w/o a matching scope', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -48,7 +48,7 @@ lab.experiment('log', function () {
     });
   });
 
-  lab.test('handleError is called when server.log("rollbarError") w/a scope', function (done) {
+  lab.test('handleError is called when server.log("rollbarError") w/a matching scope', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -68,7 +68,7 @@ lab.experiment('log', function () {
     });
   });
 
-  lab.test('reportMessage is called when server.log("rollbarError") w/a a scope', function (done) {
+  lab.test('reportMessage is called when server.log("rollbarMessage") w/p a matching scope', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -102,29 +102,127 @@ lab.experiment('log', function () {
     });
   });
 
-  lab.test('rollbarLog passes `info` as default level', function (done) {
+  lab.test('reportMessage is called when request.log("rollbarMessage") w/a matching scope', function (done) {
 
     server.register({
       register: require('../index.js'),
       options: {
         'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
-        'scope': 'foo'
+        'scope': 'frisbee'
       }
     }, function (/*err*/) {
 
-      const rbar = server.plugins.icecreambar.foo;
-      rbar.reportMessage = require('sinon').spy();
+      server.plugins.icecreambar.frisbee.reportMessage = require('sinon').spy();
 
-      const rollbarLog = require('../index.js').rollbarLog;
-      const log = rollbarLog(rbar, 'foo');
-      log({ msg: 'foo', level: 'danger-zone' }, {'rollbarMessage': true, 'foo': true});
+      server.route({
+        path: '/foo',
+        method: 'get',
+        handler: function(request, reply) {
 
-      expect(rbar.reportMessage.called).to.equal(true);
-      done();
+          request.log(['rollbarMessage', 'frisbee'], 'foooo');
+          reply();
+        }
+      });
+
+      server.inject('/foo', function(/*response*/) {
+
+        expect(server.plugins.icecreambar.frisbee.reportMessage.called).to.equal(true);
+        done();
+      });
     });
   });
 
-  lab.test('ignores logs that are neither rollbarError nor rollbarMessage', function (done) {
+  lab.test('handleError is called when request.log("rollbarError") w/a matching scope', function (done) {
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
+        'scope': 'frisbee'
+      }
+    }, function (/*err*/) {
+
+      server.plugins.icecreambar.frisbee.handleError = require('sinon').spy();
+
+      server.route({
+        path: '/foo',
+        method: 'get',
+        handler: function(request, reply) {
+
+          request.log(['rollbarError', 'frisbee'], 'foooo');
+          reply();
+        }
+      });
+
+      server.inject('/foo', function(/*response*/) {
+
+        expect(server.plugins.icecreambar.frisbee.handleError.called).to.equal(true);
+        done();
+      });
+    });
+  });
+
+  lab.test('reportMessage is NOT called when request.log("rollbarMessage") w/a matching scope', function (done) {
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
+        'scope': 'golf'
+      }
+    }, function (/*err*/) {
+
+      server.plugins.icecreambar.golf.reportMessage = require('sinon').spy();
+
+      server.route({
+        path: '/foo',
+        method: 'get',
+        handler: function(request, reply) {
+
+          request.log(['rollbarMessage', 'frisbee'], 'foooo');
+          reply();
+        }
+      });
+
+      server.inject('/foo', function(/*response*/) {
+
+        expect(server.plugins.icecreambar.golf.reportMessage.called).to.equal(false);
+        done();
+      });
+    });
+  });
+
+  lab.test('handleError is NOT called when request.log("rollbarError") w/a scope', function (done) {
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
+        'scope': 'golf'
+      }
+    }, function (/*err*/) {
+
+      server.plugins.icecreambar.golf.handleError = require('sinon').spy();
+
+      server.route({
+        path: '/foo',
+        method: 'get',
+        handler: function(request, reply) {
+
+          request.log(['rollbarError', 'frisbee'], 'foooo');
+          reply();
+        }
+      });
+
+      server.inject('/foo', function(/*response*/) {
+
+        expect(server.plugins.icecreambar.golf.handleError.called).to.equal(false);
+        done();
+      });
+    });
+  });
+
+  lab.test('reportMessage is called when request.log("rollbarMessage") w/o a matching scope', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -133,15 +231,59 @@ lab.experiment('log', function () {
       }
     }, function (/*err*/) {
 
-      const rbar = server.plugins.icecreambar.default;
-      rbar.reportMessage = require('sinon').spy();
+      server.plugins.icecreambar.default.reportMessage = require('sinon').spy();
 
-      const rollbarLog = require('../index.js').rollbarLog;
-      const log = rollbarLog(rbar, 'foo');
-      log({ msg: 'foo', level: 'danger-zone' }, {'its-not-a-rollbar': true });
+      server.route({
+        path: '/foo',
+        method: 'get',
+        handler: function(request, reply) {
 
-      expect(rbar.reportMessage.called).to.equal(false);
-      done();
+          request.log(['rollbarMessage'], 'foooo');
+          reply();
+        }
+      });
+
+      server.inject('/foo', function(/*response*/) {
+
+        expect(server.plugins.icecreambar.default.reportMessage.called).to.equal(true);
+        done();
+      });
     });
+  });
+
+  lab.test('handleError is called when request.log("rollbarError") w/o a scope', function (done) {
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
+      }
+    }, function (/*err*/) {
+
+      server.plugins.icecreambar.default.handleError = require('sinon').spy();
+
+      server.route({
+        path: '/foo',
+        method: 'get',
+        handler: function(request, reply) {
+
+          request.log(['rollbarError'], 'foooo');
+          reply();
+        }
+      });
+
+      server.inject('/foo', function(/*response*/) {
+
+        expect(server.plugins.icecreambar.default.handleError.called).to.equal(true);
+        done();
+      });
+    });
+  });
+
+  lab.test('decorateRequest ignores a null argument', function (done) {
+
+    const decorateRequest = require('../index.js').decorateRequest;
+    expect(decorateRequest()).to.equal(null);
+    done();
   });
 });
