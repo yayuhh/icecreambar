@@ -39,12 +39,14 @@ server.route({
     // implicitly log [stuff] to rollbar's recordMessage
     // leveraging hapi's built in logging system
     // http://hapijs.com/api#serverlogtags-data-timestamp
-    server.log(['rollbarMessage'], 'Interesting thing just happened');
+    server.log(['rollbarMessage'], 'Interesting thing just happened [somewhere in the server]');
+    request.log(['rollbarMessage'], 'Interesting thing just happened [in the current request]');
 
     // implicitly log [stuff] to rollbar's handleError
     // leveraging hapi's built in logging system
     // http://hapijs.com/api#serverlogtags-data-timestamp
-    server.log(['rollbarError'], new Error('ruh-roh'));
+    server.log(['rollbarError'], new Error('ruh-roh, bad server'));
+    request.log(['rollbarError'], new Error('ruh-roh, bad request'));
 
     // respond to the client
     reply('ok');
@@ -93,8 +95,8 @@ server.register({
 
       var rollbar = server.plugins.icecreambar.sre; // access the appropriate rollbar library directly
 
-      server.log(['rollbarMessage','sre'], 'This message is reported via server.app.icecreambar.sre');
-      // that log will also be reported by server.app.icecreambar.default
+      request.log(['rollbarMessage','sre'], 'This message is reported via server.app.icecreambar.sre');
+      // that log will _also_ be reported by server.app.icecreambar.default
       // ...if any rollbar client is registered in your project without a defined scope
     }
   });
