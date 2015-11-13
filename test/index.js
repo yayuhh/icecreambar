@@ -19,7 +19,11 @@ lab.experiment('server', function () {
   lab.beforeEach(function(done) {
 
     server = new Hapi.Server();
-    server.connection({});
+    server.connection({ port: 80, labels: 'a' });
+    server.connection({ port: 8080, labels: 'b' });
+
+    // suppress internal output
+    console.error = function(){};
 
     done();
   });
@@ -107,7 +111,7 @@ lab.experiment('server', function () {
       }
     });
 
-    server.inject('/foo', function(/*request, reply*/) {
+    server.connections[0].inject('/foo', function(/*request, reply*/) {
 
       expect(server.plugins.icecreambar.foo.handleError.called).to.equal(true);
       done();
@@ -138,7 +142,7 @@ lab.experiment('server', function () {
       }
     });
 
-    server.inject('/foo', function(/*request, reply*/) {
+    server.connections[0].inject('/foo', function(/*request, reply*/) {
 
       expect(server.plugins.icecreambar.foo.handleError.called).to.equal(true);
       done();
@@ -165,7 +169,7 @@ lab.experiment('server', function () {
         }
       });
 
-      server.inject('/foo', function(/*request, reply*/) {
+      server.connections[0].inject('/foo', function(/*request, reply*/) {
 
         expect(server.plugins.icecreambar.foo.handleError.called).to.equal(false);
         done();
@@ -219,7 +223,7 @@ lab.experiment('server', function () {
           }
         });
 
-        server.inject('/foo', function(/*request, reply*/) {
+        server.connections[0].inject('/foo', function(/*request, reply*/) {
 
           // node caches the result of `require('rollbar')` thus both
           // `icecreambar.foo` and `icecreambar.bar` are the same object in memory
