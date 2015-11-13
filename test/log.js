@@ -279,11 +279,4 @@ lab.experiment('log', function () {
       });
     });
   });
-
-  lab.test('decorateRequest ignores a null argument', function (done) {
-
-    const decorateRequest = require('../index.js').decorateRequest;
-    expect(decorateRequest()).to.equal(null);
-    done();
-  });
 });

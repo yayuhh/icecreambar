@@ -24,13 +24,12 @@ exports.register = function (server, options, next) {
 
   const rollbar = new exports.Rollbar(options.accessToken, options);
   server.plugins.icecreambar = server.plugins.icecreambar || {};
-  server.plugins.icecreambar.decorateRequest = decorateRequest;
   server.plugins.icecreambar[scope || 'default'] = rollbar;
 
   server.on('request-error', function internalError (request, error) {
 
     if (!pathIsRelevant(request.route.path)) { return; }
-    rollbar.handleError(error, decorateRequest(request));
+    rollbar.handleError(error, exports.relevantProperties(request));
   });
 
   // events logged with server.log()
@@ -55,13 +54,13 @@ exports.register = function (server, options, next) {
     // if this ERROR is intended for Rollbar
     if (tags.rollbarError) {
       if (scope && !tags[scope]) { return; /* ignore message */ }
-      rollbar.handleError(event, decorateRequest(request));
+      rollbar.handleError(event, exports.relevantProperties(request));
     }
 
     // if this MESSAGE is intended for Rollbar
     if (tags.rollbarMessage) {
       if (scope && !tags[scope]) { return; /* ignore message */ }
-      rollbar.reportMessage(event, 'info', decorateRequest(request));
+      rollbar.reportMessage(event, 'info', exports.relevantProperties(request));
     }
   });
 
@@ -73,12 +72,13 @@ exports.register = function (server, options, next) {
     const isBoom = response.isBoom;
 
     if (isBoom) {
+
+      // don't duplicate server.on('request-error', ...)
       const responseIsNot5xx = (response.output.statusCode < 500) || (response.output.statusCode > 599);
 
       if (responseIsNot5xx) {
-
         // submit error
-        rollbar.handleError(response, decorateRequest(request), function(/*er1*/) {
+        rollbar.handleError(response, exports.relevantProperties(request), function(/*er1*/) {
 
           // log er1 to STDERR to bring attention to the rollbar failure
           // if (er1) { console.error(er1); }
@@ -92,27 +92,16 @@ exports.register = function (server, options, next) {
   next();
 };
 
+exports.relevantProperties = function(request) {
+  return {
+    headers: request.headers,
+    url: request.path,
+    method: request.method,
+    body: request.payload
+  };
+};
+
 exports.register.attributes = {
   pkg: require('./package.json'),
   multiple: true
 };
-
-// translate rollbar's assumptions about Express
-function decorateRequest (request) {
-
-  if (!request) { return null; }
-
-  const req = request.raw.req;
-
-  req.socket = {
-    encrypted: request.server.info.protocol === 'https'
-  };
-
-  req.connection = {
-    remoteAddress: request.info.remoteAddress
-  };
-
-  return req;
-}
-
-exports.decorateRequest = decorateRequest;
