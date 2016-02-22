@@ -79,7 +79,8 @@ server.register({
   options: {
     'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
     'scope': 'sre',                                    // namespace for this instance of rollbar
-    'relevantPaths': ['/uptime', '/auth']              // http path(s) that this instance shall report on
+    'relevantPaths': ['/uptime', '/auth'],             // http path(s) that this instance shall report on
+    'omittedResponseCodes': [401]                      // do not log 401 responses
   }
 }, function (err) {
 

@@ -75,8 +75,11 @@ exports.register = function (server, options, next) {
 
       // don't duplicate server.on('request-error', ...)
       const responseIsNot5xx = (response.output.statusCode < 500) || (response.output.statusCode > 599);
+      const omittedResponseCodes = options.omittedResponseCodes || [];
+      const doNotIgnoreThisResponseCode = omittedResponseCodes.indexOf(response.output.statusCode) === -1;
+      const shouldHandleError = responseIsNot5xx && doNotIgnoreThisResponseCode;
 
-      if (responseIsNot5xx) {
+      if (shouldHandleError) {
         // submit error
         rollbar.handleError(response, exports.relevantProperties(request), function(/*er1*/) {
 
