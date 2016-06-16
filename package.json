@@ -4,7 +4,7 @@
   "description": "hapi plugin for rollbar error logging",
   "main": "index.js",
   "scripts": {
-    "test": "node --use_strict --harmony --harmony_arrow_functions ./node_modules/.bin/lab --lint -c"
+    "test": "node --use_strict ./node_modules/.bin/lab --lint -c"
   },
   "repository": {
     "type": "git",
