@@ -3,12 +3,23 @@
 # ice cream bar [![Build Status](https://travis-ci.org/yayuhh/icecreambar.svg?branch=master)](https://travis-ci.org/yayuhh/icecreambar)
 hapi plugin for rollbar error logging
 
-**icecreambar** can be registered multiple times -- this is handy if you write more than one plugin and each one wants to require/configure it's own instance of the plugin. This may happen when working on large teams and different teams are resonsible for monitoring different components.
+## quick and easy
+```javascript
+let accessToken = process.env.ROLLBAR_SERVER_ITEM_ACCESS_TOKEN;
 
-Let's start with the minimal use case, though:
+server.register({
+  register: require('icecreambar'),
+  options: { accessToken }
+}, function (err) {
 
-## [minimal] usage
-minimal usage means only registering icecreambar once in your server; this means between your server and all of your plugins, this plugin should only be registered once. See below for `multiple` usage.
+  if (err) { throw err; }
+  
+  var rollbar = server.plugins.icecreambar.default;
+  rollbar.handleUncaughtExceptions(accessToken, { exitOnUncaughtException: true });
+});
+```
+
+## thorough example
 
 ```javascript
 // http://hapijs.com/api#server
@@ -53,11 +64,11 @@ server.route({
   }
 });
 
+let accessToken = process.env.ROLLBAR_SERVER_ITEM_ACCESS_TOKEN;
+
 server.register({
   register: require('icecreambar'),
-  options: {
-    'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
-  }
+  options: { accessToken }
 }, function (err) {
 
   if (err) { throw err; }
