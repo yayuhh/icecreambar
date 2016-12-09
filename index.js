@@ -51,10 +51,17 @@ exports.register = function (server, options, next) {
   // events logged with request.log()
   server.on('request', function (request, event, tags) {
 
+    if (scope && !tags[scope]) { return; /* ignore message */ }
+
     // if this ERROR is intended for Rollbar
-    if (tags.rollbarError) {
-      if (scope && !tags[scope]) { return; /* ignore message */ }
-      rollbar.handleError(event, exports.relevantProperties(request));
+    if (event instanceof Error && tags.rollbarError) {
+      let custom = event.data ? event.data : undefined;
+
+      rollbar.handleErrorWithPayloadData(
+        event,
+        { level: 'error', custom },
+        exports.relevantProperties(request)
+      );
     }
 
     // if this MESSAGE is intended for Rollbar
@@ -72,20 +79,21 @@ exports.register = function (server, options, next) {
     const isBoom = response.isBoom;
 
     if (isBoom) {
-
       // don't duplicate server.on('request-error', ...)
-      const responseIsNot5xx = (response.output.statusCode < 500) || (response.output.statusCode > 599);
+      const responseIsNot500 = response.output.statusCode !== 500;
       const omittedResponseCodes = options.omittedResponseCodes || [];
       const doNotIgnoreThisResponseCode = omittedResponseCodes.indexOf(response.output.statusCode) === -1;
-      const shouldHandleError = responseIsNot5xx && doNotIgnoreThisResponseCode;
+      const shouldHandleError = responseIsNot500 && doNotIgnoreThisResponseCode;
 
       if (shouldHandleError) {
-        // submit error
-        rollbar.handleError(response, exports.relevantProperties(request), function(/*er1*/) {
+        let custom = response.data ? response.data : undefined;
 
-          // log er1 to STDERR to bring attention to the rollbar failure
-          // if (er1) { console.error(er1); }
-        });
+        // submit error
+        rollbar.handleErrorWithPayloadData(
+          response,
+          { level: 'error', custom },
+          exports.relevantProperties(request)
+        );
       }
     }
 
