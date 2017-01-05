@@ -9,7 +9,6 @@ exports.register = function (server, options, next) {
   server.plugins.icecreambar['default'] = rollbar;
 
   server.on('request-error', function internalError (request, error) {
-
     rollbar.handleError(error, exports.relevantProperties(request));
   });
 

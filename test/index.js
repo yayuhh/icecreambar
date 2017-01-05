@@ -62,10 +62,13 @@ lab.experiment('server', function () {
       }
     });
 
-    server.connections[0].inject('/foo', function(/*request, reply*/) {
-
-      expect(server.plugins.icecreambar.handleError.called).to.equal(true);
-      done();
+    server.connections[0].inject('/foo', function(request, reply) {
+      // due to a bug in hapi/code/lab/something, you have to wrap this in a setTimeout
+      // process.nextTick alone did not overcome the bug :face-with-rolling-eyes:
+      setTimeout(() => {
+        expect(server.plugins.icecreambar.handleError.called).to.equal(true);
+        done();
+      }, 0);
     });
   });
 
@@ -232,13 +235,17 @@ lab.experiment('server', function () {
 
       server.connections[0].inject('/foo', function(request/*, reply*/) {
 
-        expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
-        done();
+        // due to a bug in hapi/code/lab/something, you have to wrap this in a setTimeout
+        // process.nextTick alone did not overcome the bug :face-with-rolling-eyes:
+        setTimeout(() => {
+          expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
+          done();
+        }, 0);
       });
     });
   });
 
-  lab.test('request.log reports a message when it includes the rollbarMessage tag', function (done) {
+  lab.test('request.log reports an error with custom data when it includes custom data', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -262,6 +269,7 @@ lab.experiment('server', function () {
       server.connections[0].inject('/foo', function(request/*, reply*/) {
 
         expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(true);
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.args[0][1].custom).to.exist;
         done();
       });
     });
