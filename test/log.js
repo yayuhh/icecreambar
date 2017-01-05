@@ -25,9 +25,9 @@ lab.experiment('log', function () {
       }
     }, function (/*err*/) {
 
-      server.plugins.icecreambar.default.handleError = require('sinon').spy();
+      server.plugins.icecreambar.handleError = require('sinon').spy();
       server.log(['rollbarError'], 'foooo');
-      expect(server.plugins.icecreambar.default.handleError.called).to.equal(true);
+      expect(server.plugins.icecreambar.handleError.called).to.equal(true);
       done();
     });
   });
@@ -41,9 +41,9 @@ lab.experiment('log', function () {
       }
     }, function (/*err*/) {
 
-      server.plugins.icecreambar.default.reportMessage = require('sinon').spy();
+      server.plugins.icecreambar.reportMessage = require('sinon').spy();
       server.log(['rollbarMessage'], 'foooo');
-      expect(server.plugins.icecreambar.default.reportMessage.called).to.equal(true);
+      expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
       done();
     });
   });

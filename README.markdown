@@ -14,7 +14,7 @@ server.register({
 
   if (err) { throw err; }
 
-  var rollbar = server.plugins.icecreambar.default;
+  var rollbar = server.plugins.icecreambar;
   rollbar.handleUncaughtExceptions(accessToken, { exitOnUncaughtException: true });
 });
 ```
@@ -36,7 +36,7 @@ server.route({
     reply(new Error('ruh-roh!'));
 
     // access the underlying rollbar library directly
-    var rollbar = server.plugins.icecreambar.default;
+    var rollbar = server.plugins.icecreambar;
 
     // translate hapijs version of `request` to what rollbar expects
     var rollbarRequest = server.plugins.icecreambar.decorateRequest(request);
@@ -77,14 +77,14 @@ server.register({
 ```
 
 ## uncaught exceptions
-this feature should only be registered on the project level; i.e., do not enable it in your plugin(s), as the result could be unexpeted error reporting and/or duplicated errors. to leverage this feature, either require the [rollbar](https://rollbar.com/docs/notifier/node_rollbar/#uncaught-exceptions) module directly or access a registered instance (e.g. `server.plugins.icecreambar.default`). either way, it'll look something like this:
+this feature should only be registered on the project level; i.e., do not enable it in your plugin(s), as the result could be unexpeted error reporting and/or duplicated errors. to leverage this feature, either require the [rollbar](https://rollbar.com/docs/notifier/node_rollbar/#uncaught-exceptions) module directly or access a registered instance (e.g. `server.plugins.icecreambar`). either way, it'll look something like this:
 
 ```js
 var rollbar = require('rollbar'); // this requires `rollbar` is installed to your `node_modules` folder
-var rollbar = server.plugins.icecreambar.default; // this requires that you've registered `icecreambar` without a scope, or explicitly named the scope `default`. you can substitute `default` for any registered scope.
+var rollbar = server.plugins.icecreambar; // this requires that you've registered `icecreambar` without a scope, or explicitly named the scope `default`. you can substitute `default` for any registered scope.
 
 rollbar.handleUncaughtExceptions('POST_SERVER_ITEM_ACCESS_TOKEN', { exitOnUncaughtException: true });
 ```
 
 ## important
-As of version 4.0.0 this module no longer supports `scopes` and can only be registered **once**. There is only one rollbar instance -- `server.plugins.icecreambar.default`.
+As of version 4.0.0 this module no longer supports `scopes` and can only be registered **once**. There is only one rollbar instance -- `server.plugins.icecreambar`. `icecreambar.default` continues to exist as a deprecated alias.

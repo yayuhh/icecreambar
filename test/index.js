@@ -50,7 +50,7 @@ lab.experiment('server', function () {
       }
     }, function (/*err*/) {
 
-      server.plugins.icecreambar.default.handleError = require('sinon').spy();
+      server.plugins.icecreambar.handleError = require('sinon').spy();
     });
 
     server.route({
@@ -64,7 +64,7 @@ lab.experiment('server', function () {
 
     server.connections[0].inject('/foo', function(/*request, reply*/) {
 
-      expect(server.plugins.icecreambar.default.handleError.called).to.equal(true);
+      expect(server.plugins.icecreambar.handleError.called).to.equal(true);
       done();
     });
   });
@@ -78,7 +78,7 @@ lab.experiment('server', function () {
       }
     }, function (/*err*/) {
 
-      server.plugins.icecreambar.default.handleError = require('sinon').spy();
+      server.plugins.icecreambar.handleError = require('sinon').spy();
     });
 
     server.route({
@@ -91,7 +91,7 @@ lab.experiment('server', function () {
     });
 
     server.connections[0].inject('/foo', function(/*request, reply*/) {
-      expect(server.plugins.icecreambar.default.handleError.called).to.equal(false);
+      expect(server.plugins.icecreambar.handleError.called).to.equal(false);
       done();
     });
   });
@@ -104,7 +104,7 @@ lab.experiment('server', function () {
         'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.default.handleError = require('sinon').spy();
+      server.plugins.icecreambar.handleError = require('sinon').spy();
 
       server.route({
         method: 'GET',
@@ -117,7 +117,7 @@ lab.experiment('server', function () {
 
       server.connections[0].inject('/foo', function(/*request, reply*/) {
 
-        expect(server.plugins.icecreambar.default.handleError.called).to.equal(false);
+        expect(server.plugins.icecreambar.handleError.called).to.equal(false);
         done();
       });
     });
@@ -132,7 +132,7 @@ lab.experiment('server', function () {
         omittedResponseCodes: [404]
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.default.handleError = require('sinon').spy();
+      server.plugins.icecreambar.handleError = require('sinon').spy();
 
       server.route({
         method: 'GET',
@@ -145,7 +145,7 @@ lab.experiment('server', function () {
 
       server.connections[0].inject('/foo', function(/*request, reply*/) {
 
-        expect(server.plugins.icecreambar.default.handleError.called).to.equal(false);
+        expect(server.plugins.icecreambar.handleError.called).to.equal(false);
         done();
       });
     });
@@ -162,7 +162,7 @@ lab.experiment('server', function () {
         'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.default.handleErrorWithPayloadData = require('sinon').spy();
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
 
       server.route({
         method: 'GET',
@@ -176,7 +176,7 @@ lab.experiment('server', function () {
 
       server.connections[0].inject('/foo', function(request/*, reply*/) {
 
-        expect(server.plugins.icecreambar.default.handleErrorWithPayloadData.called).to.equal(true);
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(true);
         done();
       });
     });
@@ -190,7 +190,7 @@ lab.experiment('server', function () {
         'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.default.handleErrorWithPayloadData = require('sinon').spy();
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
 
       server.route({
         method: 'GET',
@@ -204,7 +204,7 @@ lab.experiment('server', function () {
 
       server.connections[0].inject('/foo', function(request/*, reply*/) {
 
-        expect(server.plugins.icecreambar.default.handleErrorWithPayloadData.called).to.equal(true);
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(true);
         done();
       });
     });
@@ -218,7 +218,7 @@ lab.experiment('server', function () {
         'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.default.reportMessage = require('sinon').spy();
+      server.plugins.icecreambar.reportMessage = require('sinon').spy();
 
       server.route({
         method: 'GET',
@@ -232,7 +232,7 @@ lab.experiment('server', function () {
 
       server.connections[0].inject('/foo', function(request/*, reply*/) {
 
-        expect(server.plugins.icecreambar.default.reportMessage.called).to.equal(true);
+        expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
         done();
       });
     });
@@ -246,7 +246,7 @@ lab.experiment('server', function () {
         'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.default.handleErrorWithPayloadData = require('sinon').spy();
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
 
       server.route({
         method: 'GET',
@@ -261,7 +261,7 @@ lab.experiment('server', function () {
 
       server.connections[0].inject('/foo', function(request/*, reply*/) {
 
-        expect(server.plugins.icecreambar.default.handleErrorWithPayloadData.called).to.equal(true);
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(true);
         done();
       });
     });
