@@ -4,7 +4,7 @@
   "description": "hapi plugin for rollbar error logging",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/lab -c --leaks"
+    "test": "./node_modules/.bin/lab -c --lint"
   },
   "repository": {
     "type": "git",
