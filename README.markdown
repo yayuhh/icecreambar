@@ -38,15 +38,6 @@ server.route({
     // access the underlying rollbar library directly
     var rollbar = server.plugins.icecreambar;
 
-    // translate hapijs version of `request` to what rollbar expects
-    var rollbarRequest = server.plugins.icecreambar.decorateRequest(request);
-
-    // explicitly log an error to Rollbar via `rollbar.handleError`:
-    rollbar.handleError(error, rollbarRequest);
-
-    // explicitly log a message to Rollbar via `rollbar.recordMessage`:
-    rollbar.reportMessage('Interesting thing just happened', 'info', rollbarRequest);
-
     // implicitly log [stuff] to rollbar's recordMessage
     // leveraging hapi's built in logging system
     // http://hapijs.com/api#serverlogtags-data-timestamp
@@ -58,6 +49,10 @@ server.route({
     // http://hapijs.com/api#serverlogtags-data-timestamp
     server.log(['rollbarError'], new Error('ruh-roh, bad server'));
     request.log(['rollbarError'], new Error('ruh-roh, bad request'));
+
+    // access the underlying rollbar library directly
+    var rollbar = server.plugins.icecreambar;
+    // and then proceed to do what you'd like with it...
 
     // respond to the client
     reply('ok');
