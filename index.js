@@ -8,10 +8,6 @@ exports.register = function (server, options, next) {
   server.plugins.icecreambar =  rollbar;
   server.plugins.icecreambar['default'] = rollbar;
 
-  server.on('request-error', function internalError (request, error) {
-    rollbar.handleError(error, exports.relevantProperties(request));
-  });
-
   // events logged with server.log()
   server.on('log', function (event, tags) {
 
@@ -47,27 +43,21 @@ exports.register = function (server, options, next) {
   });
 
   server.ext('onPreResponse', function (request, reply) {
-
     const response = request.response;
     const isBoom = response.isBoom;
+    const status = isBoom ? response.output.statusCode : response.statusCode;
+    const omittedResponseCodes = options.omittedResponseCodes || [];
+    const shouldHandleError = (status >= 300) && omittedResponseCodes.indexOf(status) === -1;
 
-    if (isBoom) {
-      // don't duplicate server.on('request-error', ...)
-      const responseIsNot500 = response.output.statusCode !== 500;
-      const omittedResponseCodes = options.omittedResponseCodes || [];
-      const doNotIgnoreThisResponseCode = omittedResponseCodes.indexOf(response.output.statusCode) === -1;
-      const shouldHandleError = responseIsNot500 && doNotIgnoreThisResponseCode;
+    if (shouldHandleError) {
+      let custom = response.data ? response.data : undefined;
 
-      if (shouldHandleError) {
-        let custom = response.data ? response.data : undefined;
-
-        // submit error
-        rollbar.handleErrorWithPayloadData(
-          response,
-          { level: 'error', custom },
-          exports.relevantProperties(request)
-        );
-      }
+      // submit error
+      rollbar.handleErrorWithPayloadData(
+        response,
+        { level: 'error', custom },
+        exports.relevantProperties(request)
+      );
     }
 
     reply.continue();

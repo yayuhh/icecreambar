@@ -41,7 +41,7 @@ lab.experiment('server', function () {
     });
   });
 
-  lab.test('handleError is called when a response is 5xx', function (done) {
+  lab.test('handleErrorWithPayloadData is called when a response is 5xx', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -50,29 +50,25 @@ lab.experiment('server', function () {
       }
     }, function (/*err*/) {
 
-      server.plugins.icecreambar.handleError = require('sinon').spy();
-    });
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
 
-    server.route({
-      method: 'get',
-      path: '/foo',
-      handler: function(request, reply) {
+      server.route({
+        method: 'get',
+        path: '/foo',
+        handler: function(request, reply) {
 
-        reply(Boom.badImplementation());
-      }
-    });
+          reply(Boom.badImplementation());
+        }
+      });
 
-    server.connections[0].inject('/foo', function(request, reply) {
-      // due to a bug in hapi/code/lab/something, you have to wrap this in a setTimeout
-      // process.nextTick alone did not overcome the bug :face-with-rolling-eyes:
-      setTimeout(() => {
-        expect(server.plugins.icecreambar.handleError.called).to.equal(true);
+      server.connections[0].inject('/foo', function(request, reply) {
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(true);
         done();
-      }, 0);
+      });
     });
   });
 
-  lab.test('rollbar.handleError does not report 400 errors reply`d in handlers', function (done) {
+  lab.test('handleErrorWithPayloadData is called when a response is 4xx', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -81,25 +77,25 @@ lab.experiment('server', function () {
       }
     }, function (/*err*/) {
 
-      server.plugins.icecreambar.handleError = require('sinon').spy();
-    });
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
 
-    server.route({
-      method: 'get',
-      path: '/foo',
-      handler: function(request, reply) {
+      server.route({
+        method: 'get',
+        path: '/foo',
+        handler: function(request, reply) {
 
-        reply(Boom.badRequest('test'));
-      }
-    });
+          reply(Boom.badRequest());
+        }
+      });
 
-    server.connections[0].inject('/foo', function(/*request, reply*/) {
-      expect(server.plugins.icecreambar.handleError.called).to.equal(false);
-      done();
+      server.connections[0].inject('/foo', function(/*request, reply*/) {
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(true);
+        done();
+      });
     });
   });
 
-  lab.test('handleError is not called when the handler response is not an error', function (done) {
+  lab.test('handleErrorWithPayloadData is not called when the handler response is not an error', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -107,26 +103,26 @@ lab.experiment('server', function () {
         'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.handleError = require('sinon').spy();
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
 
       server.route({
         method: 'GET',
         path: '/foo',
         handler: function(request, reply) {
 
-          reply('blah');
+          reply();
         }
       });
 
       server.connections[0].inject('/foo', function(/*request, reply*/) {
 
-        expect(server.plugins.icecreambar.handleError.called).to.equal(false);
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(false);
         done();
       });
     });
   });
 
-  lab.test('handleError is not called when the handler response is not an error', function (done) {
+  lab.test('handleError is not called when the response status is ignored', function (done) {
 
     server.register({
       register: require('../index.js'),
@@ -135,27 +131,24 @@ lab.experiment('server', function () {
         omittedResponseCodes: [404]
       }
     }, function (/*err*/) {
-      server.plugins.icecreambar.handleError = require('sinon').spy();
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
 
       server.route({
         method: 'GET',
         path: '/foo',
         handler: function(request, reply) {
 
-          reply(Boom.notFound());
+          reply().code(404);
         }
       });
 
       server.connections[0].inject('/foo', function(/*request, reply*/) {
 
-        expect(server.plugins.icecreambar.handleError.called).to.equal(false);
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(false);
         done();
       });
     });
   });
-
-
-
 
   lab.test('request.log reports an error when it includes the rollbarError tag', function (done) {
 
@@ -173,7 +166,7 @@ lab.experiment('server', function () {
         handler: function(request, reply) {
 
           request.log(['rollbarError'], 'ruh-roh!');
-          reply(Boom.notFound());
+          reply();
         }
       });
 
@@ -201,7 +194,7 @@ lab.experiment('server', function () {
         handler: function(request, reply) {
 
           request.log(['rollbarError']);
-          reply(Boom.notFound());
+          reply();
         }
       });
 
@@ -229,18 +222,14 @@ lab.experiment('server', function () {
         handler: function(request, reply) {
 
           request.log(['rollbarMessage'], 'ruh-roh!');
-          reply(Boom.notFound());
+          reply();
         }
       });
 
       server.connections[0].inject('/foo', function(request/*, reply*/) {
 
-        // due to a bug in hapi/code/lab/something, you have to wrap this in a setTimeout
-        // process.nextTick alone did not overcome the bug :face-with-rolling-eyes:
-        setTimeout(() => {
-          expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
-          done();
-        }, 0);
+        expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
+        done();
       });
     });
   });
