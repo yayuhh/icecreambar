@@ -72,4 +72,70 @@ lab.experiment('log', function () {
       done();
     });
   });
+
+  lab.test('personTracking  is optional', function(done) {
+    const Plugin = require('../index');
+    Plugin.Rollbar = require('sinon').spy();
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
+      }
+    }, function (err) {
+
+      expect(err).to.be.undefined();
+      expect(Plugin.Rollbar.getCall(0).args[1].personTracking).to.be.undefined();
+      done();
+    });
+  })
+
+  lab.test('personTracking options without specifying user properties uses defaults', function (done) {
+    const Plugin = require('../index');
+    Plugin.Rollbar = require('sinon').spy();
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
+        'personTracking' : {}
+      }
+    }, function (err) {
+
+      expect(err).to.be.undefined();
+      expect(Plugin.Rollbar.getCall(0).args[1].personTracking).to.equal({
+          'email': 'email',
+          'id': 'id',
+          'username': 'username'
+      });
+      done();
+    });
+  })
+
+  lab.test('personTracking options with specifying user properties uses specified properties', function (done) {
+    const Plugin = require('../index');
+    Plugin.Rollbar = require('sinon').spy();
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
+        'personTracking' : {
+          'email': 'email_address',
+          'id': 'identifier',
+          'username': 'user_name'
+        }
+      }
+    }, function (err) {
+
+      expect(err).to.be.undefined();
+      expect(Plugin.Rollbar.getCall(0).args[1].personTracking).to.equal({
+          'email': 'email_address',
+          'id': 'identifier',
+          'username': 'user_name'
+      });
+      done();
+    });
+  });
+
 });

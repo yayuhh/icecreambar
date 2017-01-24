@@ -317,4 +317,45 @@ lab.experiment('server', function () {
       });
     });
   });
+
+  lab.test('correct rollbar_person property is sent to rollbar', function (done) {
+
+    var sinon = require('sinon');
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
+        'personTracking' : {}
+      }
+    }, function (/*err*/) {
+      server.plugins.icecreambar.handleErrorWithPayloadData = sinon.spy();
+
+      server.route({
+        method: 'GET',
+        path: '/foo',
+        handler: function(request, reply) {
+
+          request.auth.credentials = {
+            'id' : 42,
+            'email' : 'test@email.com',
+            'username' : 'test'
+          }
+
+          const err = Boom.create(501);
+          err.data = 'arbitrary stuff';
+          reply(err);
+        }
+      });
+
+      server.connections[0].inject('/foo', function(request/*, reply*/) {
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.args[0][2].rollbar_person).to.equal({
+          'id' : 42,
+          'email' : 'test@email.com',
+          'username' : 'test'
+        });
+        done();        
+      });
+    });
+  });
 });

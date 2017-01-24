@@ -3,6 +3,15 @@ exports.Rollbar = require('./lib/rollbar');
 exports.register = function (server, options, next) {
 
   options.environment = options.environment || process.env.NODE_ENV || 'development';
+  
+  if(options.personTracking) {
+    var pt = options.personTracking
+    options.personTracking = {
+      id: pt.id || 'id',
+      email: pt.email || 'email',
+      username: pt.username || 'username'
+    }
+  }
 
   const rollbar = new exports.Rollbar(options.accessToken, options);
   server.plugins.icecreambar =  rollbar;
@@ -32,13 +41,13 @@ exports.register = function (server, options, next) {
       rollbar.handleErrorWithPayloadData(
         event,
         { level: 'error', custom },
-        exports.relevantProperties(request)
+        exports.relevantProperties(request, options.personTracking)
       );
     }
 
     // if this MESSAGE is intended for Rollbar
     if (tags.rollbarMessage) {
-      rollbar.reportMessage(event, 'info', exports.relevantProperties(request));
+      rollbar.reportMessage(event, 'info', exports.relevantProperties(request, options.personTracking));
     }
   });
 
@@ -57,7 +66,7 @@ exports.register = function (server, options, next) {
       rollbar.handleErrorWithPayloadData(
         response,
         { level: 'error', custom },
-        exports.relevantProperties(request)
+        exports.relevantProperties(request, options.personTracking)
       );
     }
 
@@ -67,13 +76,21 @@ exports.register = function (server, options, next) {
   next();
 };
 
-exports.relevantProperties = function(request) {
+var extractUser = function(credentials, personTracking) {
+  return {
+    id: credentials[personTracking.id],
+    email: credentials[personTracking.email],
+    username: credentials[personTracking.username],
+  }
+}
+
+exports.relevantProperties = function(request, personTracking) {
   return {
     headers: request.headers,
     url: request.path,
     method: request.method,
     body: request.payload,
-    rollbar_person: request.auth.credentials
+    rollbar_person: personTracking ? extractUser(request.auth.credentials, personTracking) : null
   };
 };
 
