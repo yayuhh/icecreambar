@@ -72,7 +72,8 @@ exports.relevantProperties = function(request) {
     headers: request.headers,
     url: request.path,
     method: request.method,
-    body: request.payload
+    body: request.payload,
+    rollbar_person: request.auth.credentials
   };
 };
 
