@@ -1,7 +1,7 @@
 ![logo](https://raw.githubusercontent.com/yayuhh/icecreambar/master/logo.png)
 
 # ice cream bar [![Build Status](https://travis-ci.org/yayuhh/icecreambar.svg?branch=master)](https://travis-ci.org/yayuhh/icecreambar)
-hapi plugin for rollbar error logging
+[Hapi](https://hapijs.com) plugin for [Rollbar](https://rollbar.com) error logging
 
 ## quick and easy
 ```javascript
@@ -71,8 +71,41 @@ server.register({
 });
 ```
 
+## person tracking
+It is possible to track which users your errors are occurring with using the personTracking option. This feature looks at ``request.auth.credentials``, and, by default, takes the ``id, email`` and ``username`` parameters to send to Rollbar. If your object does not have these *exact* properties, you can configure them as follows;
+
+```js
+
+let accessToken = process.env.ROLLBAR_SERVER_ITEM_ACCESS_TOKEN;
+
+server.register({
+  register: require('icecreambar'),
+  options: { 
+    accessToken,
+    personTracking: { // Define your request.auth.credentials properties
+      email: 'email_address',
+      id: 'identifier',
+      username: 'user_name'
+    } 
+
+    /* Defaults to {
+      email: 'email_address',
+      id: 'identifier',
+      username: 'user_name'
+    }
+    */
+  }
+}, function (err) {
+
+  if (err) { throw err; }
+  server.start();
+});
+
+```
+
+
 ## uncaught exceptions
-this feature should only be registered on the project level; i.e., do not enable it in your plugin(s), as the result could be unexpeted error reporting and/or duplicated errors. to leverage this feature, either require the [rollbar](https://rollbar.com/docs/notifier/node_rollbar/#uncaught-exceptions) module directly or access a registered instance (e.g. `server.plugins.icecreambar`). either way, it'll look something like this:
+This feature should only be registered on the project level; i.e., do not enable it in your plugin(s), as the result could be unexpeted error reporting and/or duplicated errors. To leverage this feature, either require the [rollbar](https://rollbar.com/docs/notifier/node_rollbar/#uncaught-exceptions) module directly or access a registered instance (e.g. `server.plugins.icecreambar`). Either way, it'll look something like this:
 
 ```js
 var rollbar = require('rollbar'); // this requires `rollbar` is installed to your `node_modules` folder
