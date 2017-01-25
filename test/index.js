@@ -138,7 +138,7 @@ lab.experiment('server', function () {
         path: '/foo',
         handler: function(request, reply) {
 
-          reply().code(404);
+          reply(Boom.notFound());
         }
       });
 
@@ -259,6 +259,60 @@ lab.experiment('server', function () {
 
         expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(true);
         expect(server.plugins.icecreambar.handleErrorWithPayloadData.args[0][1].custom).to.exist;
+        done();
+      });
+    });
+  });
+
+  lab.test('ignore 4xx responses that are not errors', function (done) {
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
+      }
+    }, function (/*err*/) {
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
+
+      server.route({
+        method: 'GET',
+        path: '/foo',
+        handler: function(request, reply) {
+
+          reply({}).code(403);
+        }
+      });
+
+      server.connections[0].inject('/foo', function(request/*, reply*/) {
+
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(false);
+        done();
+      });
+    });
+  });
+
+  lab.test('ignore 5xx responses that are not errors', function (done) {
+
+    server.register({
+      register: require('../index.js'),
+      options: {
+        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
+      }
+    }, function (/*err*/) {
+      server.plugins.icecreambar.handleErrorWithPayloadData = require('sinon').spy();
+
+      server.route({
+        method: 'GET',
+        path: '/foo',
+        handler: function(request, reply) {
+
+          reply({}).code(501);
+        }
+      });
+
+      server.connections[0].inject('/foo', function(request/*, reply*/) {
+
+        expect(server.plugins.icecreambar.handleErrorWithPayloadData.called).to.equal(false);
         done();
       });
     });

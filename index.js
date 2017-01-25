@@ -45,9 +45,10 @@ exports.register = function (server, options, next) {
   server.ext('onPreResponse', function (request, reply) {
     const response = request.response;
     const isBoom = response.isBoom;
+    const isError = response instanceof Error;
     const status = isBoom ? response.output.statusCode : response.statusCode;
     const omittedResponseCodes = options.omittedResponseCodes || [];
-    const shouldHandleError = (status >= 300) && omittedResponseCodes.indexOf(status) === -1;
+    const shouldHandleError = isError && omittedResponseCodes.indexOf(status) === -1;
 
     if (shouldHandleError) {
       let custom = response.data ? response.data : undefined;
