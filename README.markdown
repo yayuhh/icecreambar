@@ -1,7 +1,7 @@
 ![logo](https://raw.githubusercontent.com/yayuhh/icecreambar/master/logo.png)
 
 # ice cream bar [![Build Status](https://travis-ci.org/yayuhh/icecreambar.svg?branch=master)](https://travis-ci.org/yayuhh/icecreambar)
-[Hapi](https://hapijs.com) plugin for [Rollbar](https://rollbar.com) error logging
+[hapi](https://hapijs.com) plugin for [Rollbar](https://rollbar.com) error logging
 
 ## quick and easy
 ```javascript
@@ -72,7 +72,7 @@ server.register({
 ```
 
 ## person tracking
-It is possible to track which users your errors are occurring with using the personTracking option. This feature looks at ``request.auth.credentials``, and, by default, takes the ``id, email`` and ``username`` parameters to send to Rollbar. If your object does not have these *exact* properties, you can configure them as follows;
+It is possible to track which users your errors are occurring with using the personTracking option. To enable this feature pass `personTracking: true` in your options boject. By default, this feature inspects `request.auth.credentials` for `id`, `email` and `username` parameters to send along to Rollbar. If your application uses different properties you can configure them via an object as follows;
 
 ```js
 
@@ -80,20 +80,21 @@ let accessToken = process.env.ROLLBAR_SERVER_ITEM_ACCESS_TOKEN;
 
 server.register({
   register: require('icecreambar'),
-  options: { 
+  options: {
     accessToken,
-    personTracking: { // Define your request.auth.credentials properties
-      email: 'email_address',
-      id: 'identifier',
-      username: 'user_name'
-    } 
+    personTracking: {
+      // Define your request.auth.credentials properties
+      contact: 'email_address',
+      whackyId: 'identifier',
+      alias: 'user_name'
+    }
 
     /* Defaults to {
       email: 'email_address',
       id: 'identifier',
       username: 'user_name'
-    }
-    */
+    } */
+    personTracking: true
   }
 }, function (err) {
 

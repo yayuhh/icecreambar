@@ -3,9 +3,11 @@ exports.Rollbar = require('./lib/rollbar');
 exports.register = function (server, options, next) {
 
   options.environment = options.environment || process.env.NODE_ENV || 'development';
-  
-  if(options.personTracking) {
-    var pt = options.personTracking
+
+  // replace default user tracking attribute names
+  if (options.personTracking) {
+    const pt = options.personTracking
+
     options.personTracking = {
       id: pt.id || 'id',
       email: pt.email || 'email',
@@ -90,7 +92,7 @@ exports.relevantProperties = function(request, personTracking) {
     url: request.path,
     method: request.method,
     body: request.payload,
-    rollbar_person: personTracking ? extractUser(request.auth.credentials, personTracking) : null
+    rollbar_person: personTracking ? extractUser(request.auth.credentials, personTracking) : undefined
   };
 };
 
