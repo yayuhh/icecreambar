@@ -72,7 +72,7 @@ server.register({
 ```
 
 ## person tracking
-It is possible to track which users your errors are occurring with using the personTracking option. To enable this feature pass `personTracking: true` in your options boject. By default, this feature inspects `request.auth.credentials` for `id`, `email` and `username` parameters to send along to Rollbar. If your application uses different properties you can configure them via an object as follows;
+The personTracking option toggles passing user identifiers to Rollbar with errors and messages. To enable this feature, include `personTracking: true` in your options object. By default, this feature inspects `request.auth.credentials` for `id`, `email` and `username` parameters to send along with Rollbar requests. If your application uses different key names then you can configure them via an object as follows;
 
 ```js
 
@@ -83,10 +83,10 @@ server.register({
   options: {
     accessToken,
     personTracking: {
-      // Define your request.auth.credentials properties
-      contact: 'email_address',
-      whackyId: 'identifier',
-      alias: 'user_name'
+      // define your request.auth.credentials attribute names if they differ from the defaults, for example:
+      email: 'my_email_key_name',
+      id: 'my_id_key_name',
+      username: 'my_user_name_key_name'
     }
 
     /* Defaults to {
