@@ -21,27 +21,29 @@ exports.register = function (server, options, next) {
 
   // events logged with server.log()
   server.on('log', function (event, tags) {
+    const data = event.data;
 
     // if this ERROR is intended for Rollbar
     if (tags.rollbarError) {
-      rollbar.handleError(event);
+      rollbar.handleError(data);
     }
 
     // if this MESSAGE is intended for Rollbar
     if (tags.rollbarMessage) {
-      rollbar.reportMessage(event, 'info');
+      rollbar.reportMessage(data, 'info');
     }
   });
 
   // events logged with request.log()
   server.on('request', function (request, event, tags) {
+    const data = event.data;
 
     // if this ERROR is intended for Rollbar
     if (tags.rollbarError) {
-      let custom = event.data ? event.data : undefined;
+      const custom = (data && data.data) ? data.data : undefined;
 
       rollbar.handleErrorWithPayloadData(
-        event,
+        data,
         { level: 'error', custom },
         exports.relevantProperties(request, options.personTracking)
       );
@@ -49,7 +51,7 @@ exports.register = function (server, options, next) {
 
     // if this MESSAGE is intended for Rollbar
     if (tags.rollbarMessage) {
-      rollbar.reportMessage(event, 'info', exports.relevantProperties(request, options.personTracking));
+      rollbar.reportMessage(data, 'info', exports.relevantProperties(request, options.personTracking));
     }
   });
 
@@ -83,8 +85,8 @@ var extractUser = function(credentials, personTracking) {
     id: credentials[personTracking.id],
     email: credentials[personTracking.email],
     username: credentials[personTracking.username],
-  }
-}
+  };
+};
 
 exports.relevantProperties = function(request, personTracking) {
   return {
