@@ -1,162 +1,102 @@
 const Hapi = require('hapi');
 const Code = require('code');
 const Lab = require('lab');
+const Plugin = require('../index');
+const Sinon = require('sinon');
 
 const expect = Code.expect;
 const lab = exports.lab = Lab.script();
 
 let server;
 
-lab.experiment('log', function () {
+const ROLLBAR_TOKEN = '58b67946b9af48e8ad07595afe9d63b2';
 
-  lab.beforeEach(function(done) {
+lab.experiment('options', function () {
+
+  async function register(options = {}) {
+    
+    await server.register({
+      plugin: Plugin,
+      options: Object.assign(options, {
+        'accessToken': ROLLBAR_TOKEN,
+      })
+    });
+  };
+
+  lab.beforeEach(async () => {
+    Plugin.Rollbar = Sinon.spy();
 
     server = new Hapi.Server();
-    server.connection({});
-    done();
+    await server.start();
   });
 
-  lab.test('specified environment is passed to rollbar', function (done) {
+  lab.test('specified environment is passed to rollbar', async () => {
+    
+    await register({ environment: 'foo' });
 
-    const Plugin = require('../index');
-    Plugin.Rollbar = require('sinon').spy();
-
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'environment': 'foo',
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
-      }
-    }, function (/*err*/) {
-
-      expect(Plugin.Rollbar.getCall(0).args[1].environment).to.equal('foo');
-      done();
-    });
+    expect(Plugin.Rollbar.firstCall.args[0].environment).to.equal('foo');
   });
 
-  lab.test('process.env.NODE_ENV is used as environment when none specified', function (done) {
+  lab.test('process.env.NODE_ENV is used as environment when none specified', async () => {
+    
+    await register();
 
-    const Plugin = require('../index');
-    Plugin.Rollbar = require('sinon').spy();
-
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
-      }
-    }, function (/*err*/) {
-
-      expect(Plugin.Rollbar.getCall(0).args[1].environment).to.equal(process.env.NODE_ENV);
-      done();
-    });
+    expect(Plugin.Rollbar.firstCall.args[0].environment).to.equal(process.env.NODE_ENV);
   });
 
-  lab.test('`development` is used as environment when none specified and NODE_ENV is unset', function (done) {
-
-    const Plugin = require('../index');
-    Plugin.Rollbar = require('sinon').spy();
-
+  lab.test('`development` is used as environment when none specified and NODE_ENV is unset', async () => {
+  
     const originalNodeEnv = process.env.NODE_ENV;
     delete process.env.NODE_ENV;
 
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
-      }
-    }, function (err) {
+    await register();
 
-      expect(err).to.be.undefined();
-      expect(Plugin.Rollbar.getCall(0).args[1].environment).to.equal('development');
-      process.env.NODE_ENV = originalNodeEnv;
-      done();
+    expect(Plugin.Rollbar.firstCall.args[0].environment).to.equal('development');
+    process.env.NODE_ENV = originalNodeEnv;
+  });
+
+  lab.test('personTracking  is optional', async () => {
+
+    await register();
+
+    expect(Plugin.Rollbar.firstCall.args[0].personTracking).to.be.undefined();
+  });
+
+  lab.test('personTracking options without specifying user properties uses defaults', async () => {
+    
+    await register({ personTracking: {} });
+
+    expect(Plugin.Rollbar.firstCall.args[0].personTracking).to.equal({
+      'email': 'email',
+      'id': 'id',
+      'username': 'username'
     });
   });
 
-  lab.test('personTracking  is optional', function(done) {
-    const Plugin = require('../index');
-    Plugin.Rollbar = require('sinon').spy();
+  lab.test('personTracking options with `true` uses defaults', async () => {
+    
+    await register({ personTracking: true });
 
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
-      }
-    }, function (err) {
-
-      expect(err).to.be.undefined();
-      expect(Plugin.Rollbar.getCall(0).args[1].personTracking).to.be.undefined();
-      done();
-    });
-  })
-
-  lab.test('personTracking options without specifying user properties uses defaults', function (done) {
-    const Plugin = require('../index');
-    Plugin.Rollbar = require('sinon').spy();
-
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
-        'personTracking' : {}
-      }
-    }, function (err) {
-
-      expect(err).to.be.undefined();
-      expect(Plugin.Rollbar.getCall(0).args[1].personTracking).to.equal({
-          'email': 'email',
-          'id': 'id',
-          'username': 'username'
-      });
-      done();
+    expect(Plugin.Rollbar.firstCall.args[0].personTracking).to.equal({
+      'email': 'email',
+      'id': 'id',
+      'username': 'username'
     });
   });
 
-  lab.test('personTracking options with `true` uses defaults', function (done) {
-    const Plugin = require('../index');
-    Plugin.Rollbar = require('sinon').spy();
+  lab.test('personTracking options with specifying user properties uses specified properties', async () => {
+    
+    await register({ 
+      personTracking: {
+      'email': 'email_address',
+      'id': 'identifier',
+      'username': 'user_name'
+    }});
 
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
-        'personTracking' : true
-      }
-    }, function (err) {
-
-      expect(err).to.be.undefined();
-      expect(Plugin.Rollbar.getCall(0).args[1].personTracking).to.equal({
-          'email': 'email',
-          'id': 'id',
-          'username': 'username'
-      });
-      done();
-    });
-  });
-
-  lab.test('personTracking options with specifying user properties uses specified properties', function (done) {
-    const Plugin = require('../index');
-    Plugin.Rollbar = require('sinon').spy();
-
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2',
-        'personTracking' : {
-          'email': 'email_address',
-          'id': 'identifier',
-          'username': 'user_name'
-        }
-      }
-    }, function (err) {
-
-      expect(err).to.be.undefined();
-      expect(Plugin.Rollbar.getCall(0).args[1].personTracking).to.equal({
-          'email': 'email_address',
-          'id': 'identifier',
-          'username': 'user_name'
-      });
-      done();
+    expect(Plugin.Rollbar.firstCall.args[0].personTracking).to.equal({
+      'email': 'email_address',
+      'id': 'identifier',
+      'username': 'user_name'
     });
   });
 
