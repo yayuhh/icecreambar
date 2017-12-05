@@ -10,7 +10,7 @@ let server;
 
 const ROLLBAR_TOKEN = '58b67946b9af48e8ad07595afe9d63b2';
 
-lab.experiment.only('server', function () {
+lab.experiment('server', function () {
 
   async function register(fn, options = {}) {
     
