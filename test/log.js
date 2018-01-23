@@ -7,44 +7,42 @@ const lab = exports.lab = Lab.script();
 
 let server;
 
+const ROLLBAR_TOKEN = '58b67946b9af48e8ad07595afe9d63b2';
+
 lab.experiment('log', function () {
 
-  lab.beforeEach(function(done) {
+  async function register() {
+    
+    await server.register({
+      plugin: require('../index.js'),
+      options:{
+        'accessToken': ROLLBAR_TOKEN,
+      }
+    });
+  };
 
+  lab.beforeEach(async () => {
     server = new Hapi.Server();
-    server.connection({});
-    done();
+    await server.start();
   });
 
-  lab.test('handleError is called when server.log("rollbarError"', function (done) {
+  lab.test('handleError is called when server.log("rollbarError")', async () => {
+    
+    await register();
 
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
-      }
-    }, function (/*err*/) {
+    server.plugins.icecreambar.handleError = require('sinon').spy();
+    server.log(['rollbarError'], 'foooo');
 
-      server.plugins.icecreambar.handleError = require('sinon').spy();
-      server.log(['rollbarError'], 'foooo');
-      expect(server.plugins.icecreambar.handleError.called).to.equal(true);
-      done();
-    });
+    expect(server.plugins.icecreambar.handleError.called).to.equal(true);
   });
 
-  lab.test('reportMessage is called when server.log("rollbarError")', function (done) {
+  lab.test('reportMessage is called when server.log("rollbarError")', async () => {
 
-    server.register({
-      register: require('../index.js'),
-      options: {
-        'accessToken': '58b67946b9af48e8ad07595afe9d63b2'
-      }
-    }, function (/*err*/) {
+    await register();
 
-      server.plugins.icecreambar.reportMessage = require('sinon').spy();
-      server.log(['rollbarMessage'], 'foooo');
-      expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
-      done();
-    });
+    server.plugins.icecreambar.reportMessage = require('sinon').spy();
+    server.log(['rollbarMessage'], 'foooo');
+
+    expect(server.plugins.icecreambar.reportMessage.called).to.equal(true);
   });
 });
