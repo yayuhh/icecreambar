@@ -183,4 +183,19 @@ lab.experiment('server', function () {
       'username' : 'test'
     });
   });
+
+  lab.test('rollbar_person undefined when credential are empty', async () => {
+
+    const fn = (request, h) =>{
+
+      const err = Boom.create(501);
+      err.data = 'arbitrary stuff';
+
+      return err;
+    };
+
+    await register(fn, { personTracking : {} });
+
+    expect(server.plugins.icecreambar.handleErrorWithPayloadData.args[0][2].rollbar_person).to.be.undefined();
+  });
 });

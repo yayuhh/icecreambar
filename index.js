@@ -84,11 +84,15 @@ exports.plugin = {
 };
 
 const extractUser = function(credentials, personTracking) {
-  return {
-    id: credentials[personTracking.id],
-    email: credentials[personTracking.email],
-    username: credentials[personTracking.username],
-  };
+  if (personTracking && credentials) {
+    return {
+      id: credentials[personTracking.id],
+      email: credentials[personTracking.email],
+      username: credentials[personTracking.username],
+    }; 
+  }
+
+  return undefined;
 };
 
 exports.relevantProperties = function(request, personTracking) {
@@ -97,6 +101,6 @@ exports.relevantProperties = function(request, personTracking) {
     url: request.path,
     method: request.method,
     body: request.payload,
-    rollbar_person: personTracking ? extractUser(request.auth.credentials, personTracking) : undefined
+    rollbar_person: extractUser(request.auth.credentials, personTracking)
   };
 };
